@@ -9,9 +9,13 @@ public class Player : MonoBehaviour
     public float jumpPower = 5f; // 점프 힘
     private bool isGrounded; // 플레이어가 바닥에 닿아 있는지 확인
 
+    private AudioSource audio;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        audio = GetComponent<AudioSource>();
+        
     }
 
     void Update()
@@ -48,6 +52,16 @@ public class Player : MonoBehaviour
         {
             isGrounded = true;
         }
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == "sound")
+        {
+            audio.Play();
+        }
+        
     }
 
     private void OnCollisionExit2D(Collision2D collision)
