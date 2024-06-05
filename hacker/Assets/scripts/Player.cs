@@ -9,41 +9,71 @@ public class Player : MonoBehaviour
     public float jumpPower = 5f; // 점프 힘
     private bool isGrounded; // 플레이어가 바닥에 닿아 있는지 확인
 
+
+    
+    public float laserRange = 4f;
+
+    private SpriteRenderer spriteRenderer;
+
+    public TalkManager manager;
+
     private AudioSource audio;
 
-    void Awake()
+    BoxCollider2D boxCollider;
+
+    public GameObject targetObject;
+
+    private bool laserHitOnce = false; // 레이저가 충돌했는지 여부
+
+
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         audio = GetComponent<AudioSource>();
-        
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+
+
     }
+
+
+
 
     void Update()
     {
-        Move();
-        Jump();
-    }
-
-    public void Move()
-    {
-        // 입력값 받아오기
-        float moveHorizontal = Input.GetAxis("Horizontal"); // A와 D 또는 화살표 좌우
-
-        // 이동 방향 설정
-        Vector2 movement = new Vector2(moveHorizontal * speed, rb.velocity.y);
-
         // 이동
-        rb.velocity = movement;
+        float moveInput = manager.isAction ? 0 : Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+
+        // 방향 전환
+        if (moveInput > 0)
+        {
+            spriteRenderer.flipX = false;
+
+        }
+        else if (moveInput < 0)
+        {
+            spriteRenderer.flipX = true;
+
+        }
+
+
+
+        // 점프 (스페이스바 사용)
+       
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !manager.isAction)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpPower);
+        }
+
+
+        ShootLaser();
     }
 
-    public void Jump()
-    {
-        // 점프 입력 감지 및 바닥에 닿아있는지 확인
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            rb.AddForce(new Vector2(0, jumpPower), ForceMode2D.Impulse);
-        }
-    }
+
+
+
 
     // 바닥에 닿았는지 확인
     private void OnCollisionEnter2D(Collision2D collision)
@@ -61,7 +91,7 @@ public class Player : MonoBehaviour
         {
             audio.Play();
         }
-        
+
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -70,6 +100,55 @@ public class Player : MonoBehaviour
         {
             isGrounded = false;
         }
+    }
+
+
+    void ShootLaser()
+    {
+        // 레이저의 방향과 시작 위치를 설정하기
+        Vector2 direction = spriteRenderer.flipX ? Vector2.left : Vector2.right;
+        Vector2 startPosition = transform.position;
+
+        int layerMask = LayerMask.GetMask("Target");
+
+        //레이저 발사 
+        RaycastHit2D hit = Physics2D.Raycast(startPosition, direction, laserRange, layerMask);
+        Debug.DrawRay(startPosition, direction * laserRange, Color.red);
+
+
+        //맞춘 애들 이름 검사
+        if (hit.collider != null)
+        {
+            
+            if (Input.GetButtonDown("Jump"))
+            {
+                manager.Action();
+                SetIsTrigger(targetObject); // istrigger 켜기
+            }
+
+            if (!laserHitOnce) // 처음으로 맞추었을 때만
+            {
+                manager.Sus();
+                laserHitOnce = true; // 레이저가 맞추었음을 기록
+            }
+
+            Debug.Log("히히 맞았다" + hit.collider.gameObject.name);
+            
+
+        }
+
+    }
+
+    void SetIsTrigger(GameObject target)
+    {
+    
+        BoxCollider2D boxCollider = target.GetComponent<BoxCollider2D>();
+        if (boxCollider != null)
+        {
+            boxCollider.isTrigger = true;
+            Debug.Log("BoxCollider isTrigger set to true for " + target.name);
+        }
+
     }
 }
 
