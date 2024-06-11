@@ -9,8 +9,9 @@ public class Player : MonoBehaviour
     public float jumpPower = 5f; // 점프 힘
     private bool isGrounded; // 플레이어가 바닥에 닿아 있는지 확인
 
+    public int health = 100;
+    public int count = 0;
 
-    
     public float laserRange = 4f;
 
     private SpriteRenderer spriteRenderer;
@@ -23,7 +24,7 @@ public class Player : MonoBehaviour
 
     public GameObject targetObject;
 
-    private bool laserHitOnce = false; // 레이저가 충돌했는지 여부
+   
 
 
     void Start()
@@ -31,9 +32,6 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         audio = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
-
-
     }
 
 
@@ -57,16 +55,11 @@ public class Player : MonoBehaviour
 
         }
 
-
-
         // 점프 (스페이스바 사용)
-       
-
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !manager.isAction)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpPower);
         }
-
 
         ShootLaser();
     }
@@ -102,7 +95,6 @@ public class Player : MonoBehaviour
         }
     }
 
-
     void ShootLaser()
     {
         // 레이저의 방향과 시작 위치를 설정하기
@@ -120,35 +112,26 @@ public class Player : MonoBehaviour
         if (hit.collider != null)
         {
             
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetKeyDown("f"))
             {
                 manager.Action();
-                SetIsTrigger(targetObject); // istrigger 켜기
             }
-
-            if (!laserHitOnce) // 처음으로 맞추었을 때만
-            {
-                manager.Sus();
-                laserHitOnce = true; // 레이저가 맞추었음을 기록
-            }
-
-            Debug.Log("히히 맞았다" + hit.collider.gameObject.name);
-            
-
+            manager.spacePanel.SetActive(true);
+        }else if(manager.isTalk)
+        {
+            manager.spacePanel.SetActive(false);
         }
-
     }
 
-    void SetIsTrigger(GameObject target)
+    public void TakeDamage(int damage)
     {
-    
-        BoxCollider2D boxCollider = target.GetComponent<BoxCollider2D>();
-        if (boxCollider != null)
-        {
-            boxCollider.isTrigger = true;
-            Debug.Log("BoxCollider isTrigger set to true for " + target.name);
-        }
+        health -= damage;
 
+        if (health <= 0)
+        {
+            // 플레이어 체력이 0 이하일 때 사망 처리
+            manager.Action();
+        }
     }
 }
 
