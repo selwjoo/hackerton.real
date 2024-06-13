@@ -9,8 +9,9 @@ public class Player : MonoBehaviour
     public float jumpPower = 5f; // 점프 힘
     private bool isGrounded; // 플레이어가 바닥에 닿아 있는지 확인
 
+    public int health = 100;
+    public int count = 0;
 
-    
     public float laserRange = 4f;
 
     private SpriteRenderer spriteRenderer;
@@ -22,6 +23,8 @@ public class Player : MonoBehaviour
     BoxCollider2D boxCollider;
 
     public GameObject targetObject;
+
+   
 
 
     void Start()
@@ -117,6 +120,17 @@ public class Player : MonoBehaviour
         }else if(manager.isTalk)
         {
             manager.spacePanel.SetActive(false);
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            // 플레이어 체력이 0 이하일 때 사망 처리
+            manager.Action();
         }
     }
 }
