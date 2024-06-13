@@ -24,6 +24,10 @@ public class Player : MonoBehaviour
 
     public GameObject targetObject;
 
+    Animator animator;
+
+    public string ani;
+
    
 
 
@@ -32,6 +36,8 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         audio = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+        ani = "isRun";
     }
 
 
@@ -47,12 +53,16 @@ public class Player : MonoBehaviour
         if (moveInput > 0)
         {
             spriteRenderer.flipX = false;
-
+            animator.SetBool(ani, true);
         }
         else if (moveInput < 0)
         {
             spriteRenderer.flipX = true;
+            animator.SetBool(ani, true);
 
+        }else
+        {
+            animator.SetBool(ani, false);
         }
 
         // 점프 (스페이스바 사용)
@@ -60,7 +70,6 @@ public class Player : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpPower);
         }
-
         ShootLaser();
     }
 
@@ -111,10 +120,10 @@ public class Player : MonoBehaviour
         //맞춘 애들 이름 검사
         if (hit.collider != null)
         {
-            
             if (Input.GetKeyDown("f"))
             {
                 manager.Action();
+                ani = "isGun";
             }
             manager.spacePanel.SetActive(true);
         }else if(manager.isTalk)

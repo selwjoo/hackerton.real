@@ -8,27 +8,34 @@ public class Jombie : MonoBehaviour
     public int health = 100; // 체력
     public int damage = 10; // 플레이어에게 입히는 데미지
   
-
     private Transform player; // 플레이어 위치
     private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer;
+
+    Animator animator;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody2D>();
-       
-
-     
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
+        spriteRenderer.flipX = true;
         if (player != null)
         {
             // 플레이어를 향해 이동
             Vector2 direction = (player.position - transform.position).normalized;
             rb.velocity = new Vector2(direction.x, direction.y) * speed;
+            animator.SetBool("isRun", true);
         }
+        else
+        {
+            animator.SetBool("isRun", false);
+        }  
     }
 
     void OnTriggerEnter2D(Collider2D other)
